@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kichik do'kon uchun zaxira yordamchisi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between antialiased bg-slate-50">
+
+    <header class="bg-indigo-700 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 w-full sm:w-auto">
+                <div class="p-2.5 bg-indigo-600 rounded-xl shadow-inner border border-indigo-500 shrink-0">
+                    <i class="fa-solid fa-boxes-stacked text-2xl text-amber-300"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">Kichik Do'kon Zaxira Yordamchisi</h1>
+                    <p class="text-xs text-indigo-200">Mahsulotlar qoldig'i, kirim va chiqim nazorati</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                <button onclick="openTransactionModal()" class="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-lg font-medium text-sm transition flex items-center shadow-sm">
+                    <i class="fa-solid fa-right-left mr-2"></i> Kirim / Chiqim
+                </button>
+                <button onclick="openProductModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 border border-indigo-400 active:scale-95 text-white rounded-lg font-medium text-sm transition flex items-center">
+                    <i class="fa-solid fa-plus mr-1.5"></i> Yangi mahsulot
+                </button>
+                <button onclick="confirmResetData()" title="Boshlang'ich demo holatiga qaytarish" class="p-2 text-indigo-200 hover:text-white hover:bg-indigo-600 rounded-lg transition active:scale-95">
+                    <i class="fa-solid fa-rotate-left text-base"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="lowStockBanner" class="hidden bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-3 transition animate-fade-in">
+        <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center text-sm font-medium">
+                <span class="flex h-3 w-3 relative mr-2.5 shrink-0">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                </span>
+                <i class="fa-solid fa-triangle-exclamation text-amber-600 text-base mr-2"></i>
+                <span id="lowStockBannerText">Ogohlantirish: Ayrim mahsulotlar zaxirasi minimal chegaradan past!</span>
+            </div>
+            <button onclick="filterLowStockOnly()" class="text-xs bg-amber-200 hover:bg-amber-300 text-amber-900 px-3 py-1.5 rounded-md font-semibold transition border border-amber-300">
+                <i class="fa-solid fa-filter mr-1"></i> Kam qolganlarni ko'rish
+            </button>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1">
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Jami Mahsulotlar</p>
+                    <p id="statTotalProducts" class="text-2xl font-extrabold text-slate-800 mt-1">0</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0">
+                    <i class="fa-solid fa-cubes"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Barchasi Yetarli</p>
+                    <p id="statNormalStockCount" class="text-2xl font-extrabold text-emerald-600 mt-1">0</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shrink-0">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+            </div>
+
+            <div id="statLowStockCard" class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center justify-between transition">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Ogohlantirishdagilar</p>
+                    <p id="statLowStockCount" class="text-2xl font-extrabold text-rose-600 mt-1">0</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-lg shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Jami Amallar</p>
+                    <p id="statTotalOperations" class="text-2xl font-extrabold text-slate-800 mt-1">0</p>
+                </div>
+                <div class="w-10 h-10 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-lg shrink-0">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-lg self-start sm:self-auto">
+                    <button id="tabAll" onclick="setFilter('all')" class="px-3 py-1.5 text-xs font-semibold rounded-md transition shadow-sm bg-white text-indigo-700">
+                        Barchasi
+                    </button>
+                    <button id="tabLow" onclick="setFilter('low')" class="px-3 py-1.5 text-xs font-semibold rounded-md transition text-slate-600 hover:text-slate-900 flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 mr-1.5"></span> Tugayotganlar
+                    </button>
+                    <button id="tabNormal" onclick="setFilter('normal')" class="px-3 py-1.5 text-xs font-semibold rounded-md transition text-slate-600 hover:text-slate-900">
+                        Yetarlilar
+                    </button>
+                </div>
+
+                <div class="relative flex-1 max-w-md">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Mahsulot nomi yoki kategoriyani qidirish..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition">
+                </div>
+
+                <div class="flex items-center space-x-2 border-l border-slate-200 pl-4 hidden sm:flex">
+                    <span class="text-xs text-slate-400 font-medium">Ko'rinish:</span>
+                    <button id="viewGridBtn" onclick="setViewMode('grid')" class="p-2 text-indigo-600 bg-indigo-50 rounded-lg">
+                        <i class="fa-solid fa-border-all"></i>
+                    </button>
+                    <button id="viewTableBtn" onclick="setViewMode('table')" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg">
+                        <i class="fa-solid fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                <i class="fa-solid fa-boxes-packing text-indigo-600 mr-2"></i> Mahsulotlar Ombori
+            </h2>
+            <span id="filteredCountBadge" class="text-xs text-slate-500 font-medium bg-slate-100 px-2.5 py-1 rounded-full">6 ta mahsulot</span>
+        </div>
+
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8"></div>
+
+        <div id="productsTableWrapper" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-600">
+                    <thead class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                            <th class="py-3 px-4">Mahsulot Nomi</th>
+                            <th class="py-3 px-4">Kategoriya / Birlik</th>
+                            <th class="py-3 px-4">Minimal Chegara</th>
+                            <th class="py-3 px-4">Joriy Qoldiq</th>
+                            <th class="py-3 px-4">Holat</th>
+                            <th class="py-3 px-4 text-right">Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 mt-10">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-100">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                        <i class="fa-solid fa-clock-rotate-left text-indigo-600 mr-2"></i> Kirim va Chiqim Amallari Tarixi
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">So'nggi barcha amallar jurnali (avtomatik saqlanadi)</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="exportHistoryCSV()" class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition border border-slate-200 flex items-center active:scale-95">
+                        <i class="fa-solid fa-file-csv mr-1.5 text-emerald-600"></i> Excel / CSV yuklab olish
+                    </button>
+                    <button onclick="confirmClearHistory()" class="px-3 py-1.5 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition flex items-center active:scale-95">
+                        <i class="fa-solid fa-trash-can mr-1.5"></i> Tarixni tozalash
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                            <th class="py-3 px-4">Sana va Vaqt</th>
+                            <th class="py-3 px-4">Mahsulot</th>
+                            <th class="py-3 px-4">Amal Turi</th>
+                            <th class="py-3 px-4">Miqdor</th>
+                            <th class="py-3 px-4">Qoldiq (Keyin)</th>
+                            <th class="py-3 px-4">Izoh</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionHistoryBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                </table>
+            </div>
+            
+            <div id="emptyHistoryState" class="hidden text-center py-8 text-slate-400">
+                <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
+                <p class="text-sm">Hozircha hech qanday harakat qayd etilmagan.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8 text-center text-xs text-slate-500">
+        <p>© 2026 Kichik Do'kon Zaxira Yordamchisi. Barcha ma'lumotlar xavfsiz holatda brauzerda (LocalStorage) saqlanadi.</p>
+    </footer>
+
+    <div id="transactionModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden animate-fade-in border border-slate-100">
+            <div class="bg-indigo-700 px-6 py-4 text-white flex items-center justify-between">
+                <h3 class="font-bold text-lg flex items-center">
+                    <i class="fa-solid fa-right-left mr-2 text-amber-300"></i> Kirim / Chiqim Qo'shish
+                </h3>
+                <button onclick="closeTransactionModal()" class="text-indigo-200 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form id="transactionForm" onsubmit="handleTransactionSubmit(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Mahsulotni tanlang</label>
+                    <select id="transProductId" onchange="updateModalStockPreview()" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></select>
+                    <p id="transStockPreview" class="text-xs text-slate-500 mt-1">Mavjud qoldiq: -</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Harakat Turi</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="transType" value="kirim" checked class="peer sr-only">
+                            <div class="text-center py-2.5 px-3 rounded-lg border border-slate-200 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 font-semibold text-sm transition">
+                                <i class="fa-solid fa-arrow-down-left mr-1 text-emerald-600"></i> Kirim (+)
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="transType" value="chiqim" class="peer sr-only">
+                            <div class="text-center py-2.5 px-3 rounded-lg border border-slate-200 peer-checked:border-rose-500 peer-checked:bg-rose-50 peer-checked:text-rose-700 font-semibold text-sm transition">
+                                <i class="fa-solid fa-arrow-up-right mr-1 text-rose-600"></i> Sotuv / Chiqim (-)
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Miqdori</label>
+                    <input type="number" id="transQuantity" min="0.01" step="any" required placeholder="Masalan: 5" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Izoh / Sharh (Ixtiyoriy)</label>
+                    <input type="text" id="transNote" placeholder="Masalan: Ta'minotchidan keldi / Mijozga sotildi" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="pt-2 flex items-center space-x-2">
+                    <button type="button" onclick="closeTransactionModal()" class="w-1/2 py-2.5 border border-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition">Bekor qilish</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition shadow-md">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="productModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden animate-fade-in border border-slate-100">
+            <div class="bg-slate-800 px-6 py-4 text-white flex items-center justify-between">
+                <h3 id="productModalTitle" class="font-bold text-lg flex items-center">
+                    <i class="fa-solid fa-box-archive mr-2 text-indigo-400"></i> Mahsulot Sozlamalari
+                </h3>
+                <button onclick="closeProductModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form id="productForm" onsubmit="handleProductSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="editProductId" value="">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Mahsulot Nomi</label>
+                    <input type="text" id="prodName" required placeholder="Masalan: Shakar (kg)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Kategoriya</label>
+                        <input type="text" id="prodCategory" placeholder="Masalan: Baqqollik" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">O'lchov Birligi</label>
+                        <select id="prodUnit" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="kg">kg</option>
+                            <option value="dona">dona</option>
+                            <option value="litr">litr</option>
+                            <option value="pachka">pachka</option>
+                            <option value="qop">qop</option>
+                            <option value="quti">quti</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Boshlang'ich Qoldiq</label>
+                        <input type="number" id="prodStock" min="0" step="any" required placeholder="10" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Eng Kam Zaxira Chegarasi</label>
+                        <input type="number" id="prodMinLimit" min="0" step="any" required placeholder="5" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-2 flex items-center space-x-2">
+                    <button type="button" onclick="closeProductModal()" class="w-1/2 py-2.5 border border-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition">Bekor qilish</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-semibold transition shadow-md">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="errorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-fade-in border-t-4 border-rose-500">
+            <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Chiqim Rad Etildi!</h3>
+            <p id="errorMessageText" class="text-sm text-rose-700 mb-6 bg-rose-50 p-3.5 rounded-xl border border-rose-200 font-semibold leading-relaxed">
+                ❌ Xatolik: Mavjud qoldiqdan ortiqcha chiqim qilib bo'lmaydi!
+            </p>
+            <button onclick="closeErrorModal()" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-semibold text-sm transition shadow-md active:scale-95">
+                Tushundim, To'g'rilayman
+            </button>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center animate-fade-in">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
+            <h3 id="confirmModalTitle" class="text-base font-bold text-slate-800 mb-1">Ishonchingiz komilmi?</h3>
+            <p id="confirmModalText" class="text-xs text-slate-500 mb-5">Ushbu amalni ortga qaytarib bo'lmaydi.</p>
+            <div class="flex items-center space-x-2">
+                <button onclick="closeConfirmModal()" class="w-1/2 py-2 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-50">Yo'q, bekor qilish</button>
+                <button id="confirmModalBtn" class="w-1/2 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold transition">Ha, davom etish</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
